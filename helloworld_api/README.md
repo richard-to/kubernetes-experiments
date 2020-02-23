@@ -71,7 +71,7 @@ kubectl create -f ./kubernetes/helloworld/deployment.yaml;
 kubectl apply -f ./kubernetes/minikube-ingress.yml;
 ```
 
-In order to view the Helloworld API, you'll need to update your `/etc/hosts` file.
+In order to view the Helloworld API, we'll need to update our `/etc/hosts` file.
 
 You can get the IP of your minikube VM installation using `minikube ip`. My IP is `192.168.99.101`.
 
