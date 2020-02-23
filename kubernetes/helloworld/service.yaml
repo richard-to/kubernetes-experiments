@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: helloworld
+  labels:
+    service: helloworld
+spec:
+  selector:
+    app: helloworld
+  ports:
+  - port: 80
+
