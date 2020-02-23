@@ -1,0 +1,7 @@
+# Generated files
+__pycache__
+.DS_Store
+
+# VSCode
+*code-workspace
+.vscode
