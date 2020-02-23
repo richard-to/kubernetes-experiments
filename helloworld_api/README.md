@@ -84,10 +84,11 @@ Now you should be able to view the api at http://helloworld.test
 ## 4.1 Service file
 
 This file configures a `helloworld` service that provides access to
-the `helloworld` app via port `5000`.
+the `helloworld` app via port `80`.
 
-The `targetPort` value is the port exposed by the `helloworld` app container, which
-is `80` by default.
+The `targetPort` is the port exposed by the `helloworld` app container, which
+is also `80`. Since this is the same `port`, we don't have to specify a `targetPort` since
+it will default to the value specified by `port`.
 
 ```yml
 apiVersion: v1
@@ -100,8 +101,7 @@ spec:
   selector:
     app: helloworld
   ports:
-  - port: 5000
-    targetPort: 80
+  - port: 80
 ```
 
 ## 4.2 Deployment file
@@ -137,8 +137,9 @@ This file configures access to our helloworld app at http://helloworld.test.
 
 Here we use the `.test` domain since it is a reserved domain. I didn't use `.local` since Bonjour uses that domain.
 
-Basically we specify a host and link it to the helloworld service and port. Note that servicePort 5000
-is the port to access the helloworld app internally. By default, the app is accessed from port 80 externally.
+Basically we specify a host and link it to the helloworld service and port. Note that servicePort is set to 80.
+This is the port to access the helloworld app internally. Externally access to the app is also configured for port 80. In
+this case they just happen to be the same.
 
 ```yml
 apiVersion: extensions/v1beta1
@@ -154,5 +155,5 @@ spec:
       - path: /
         backend:
           serviceName: helloworld
-          servicePort: 5000
+          servicePort: 80
 ```
