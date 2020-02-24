@@ -12,7 +12,7 @@ spec:
         backend:
           serviceName: helloworld
           servicePort: 80
-  - host: auth.inspections.test
+  - host: auth.books.test
     http:
       paths:
       - path: /

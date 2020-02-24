@@ -57,6 +57,45 @@ In another terminal, you now can push the image:
 docker push localhost:5000/helloworld;
 ```
 
+## 3.1 Alternate method to push Docker image to Minikube registry
+
+After deleting my Minikube cluster and creating new one, I noticed that the above
+approach stopped working. I'm not sure what happened, but I did notice it used Hyperkit instead
+VirtualBox this time.
+
+Instead I had to do the following:
+
+In terminal 1:
+
+```
+kubectl port-forward --namespace kube-system [your-registry-pod-name] 5000:5000
+```
+
+In terminal 2:
+
+```
+docker run --rm -it --network=host alpine ash -c "apk add socat && socat TCPISTEN:5000,reuseaddr,fork TCP:host.docker.internal:5000"
+```
+
+In terminal 3:
+
+```
+docker push localhost:5000/helloworld;
+```
+
+This is the approach for Windows:
+
+- [https://minikube.sigs.k8s.io/docs/tasks/registry/insecure/](https://minikube.sigs.k8s.io/docs/tasks/registry/insecure/)
+
+To get the name of your registry pod, you can use this command: `kubectl get pods  --namespace kube-system`.
+
+You can also use the approach used here:
+
+- [https://minikube.sigs.k8s.io/docs/tasks/docker_registry/](https://minikube.sigs.k8s.io/docs/tasks/docker_registry/)
+
+The problem with this approach is that image must be tagged with the Minikube IP instead of localhost, which
+makes it unconvenient to use with the Kubernetes declarative approach.
+
 # 4. Deploying the Helloworld API
 
 ```shell

@@ -14,4 +14,4 @@ SESSION_DB_TOKEN_KEY = "secret"
 
 # OAuth2
 ACCESS_TOKEN_EXPIRE_MINUTES = 10
-TOKEN_URL = "http://auth.inspections.test/accounts/token"
+TOKEN_URL = "http://auth.books.test/accounts/token"
