@@ -1,0 +1,46 @@
+# Configure a ClusterIP service that will give us internal acess to the authentication api.
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-api
+  labels:
+    service: auth-api
+spec:
+  selector:
+    app: auth-api
+  ports:
+  - port: 80
+
+---
+
+# Configure a deployment for the authentication api
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-api
+  template:
+    metadata:
+      labels:
+        app: auth-api
+    spec:
+      containers:
+      - name: auth-api
+        image: localhost:5000/auth-api:latest
+        env:
+          - name: AUTH_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: auth-db-credentials
+                key: user
+          - name: AUTH_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: auth-db-credentials
+                key: password
+        ports:
+        - containerPort: 80

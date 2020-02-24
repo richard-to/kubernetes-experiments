@@ -1,0 +1,138 @@
+# Configure a persistent volume for postgres since we want to keep this data even if the postgres
+# pod is deleted.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: auth-db-pv
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 128M
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/auth-db-pv"
+
+---
+
+# I don't full understand PersistentVolumeClaims, but it seems to describe how a PersistentVolume can be
+# used, such as access mode and storage. In addition the PersistentVolumeClaim seems to work like
+# Services, which provide access to a Pod.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: auth-db-pvc
+  labels:
+    type: local
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 128M
+  volumeName: auth-db-pv
+  storageClassName: standard
+
+---
+
+# Configure a NodePort service that will give us access to the Postgres Pod.
+#
+# We are using NodePort for development purposes, since this service exposes an external port
+# via nodePort, which will give us access to the database.
+#
+# In production we'd probably user a ClusterIP service which allows internal access only.
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-db
+spec:
+  selector:
+    service: auth-db
+  type: NodePort
+  ports:
+  - port: 5432
+    nodePort: 30001
+
+---
+
+# Configure a deployment for our postgres database. Uses secrets to retrieve the
+# postgres user and password,
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-db
+  labels:
+    name: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: auth-db
+  template:
+    metadata:
+      labels:
+        service: auth-db
+    spec:
+      containers:
+      - name: auth-db
+        image: postgres:12-alpine
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: auth-db-credentials
+                key: user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: auth-db-credentials
+                key: password
+        volumeMounts:
+          - name: auth-db-volume-mount
+            mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: auth-db-volume-mount
+        persistentVolumeClaim:
+          claimName: auth-db-pvc
+      restartPolicy: Always
+
+---
+
+# Configure a NodePort service that will give us access to the Redis Pod, which
+# will use to store sessions.
+apiVersion: v1
+kind: Service
+metadata:
+  name: session-db
+spec:
+  selector:
+    service: session-db
+  type: NodePort
+  ports:
+  - port: 6379
+    nodePort: 30002
+
+---
+
+# Configure a deployment for our session db (Redis)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: session-db
+  template:
+    metadata:
+      labels:
+        service: session-db
+    spec:
+      containers:
+      - name: session-db
+        image: redis:5.0-alpine
+        ports:
+        - containerPort: 6379

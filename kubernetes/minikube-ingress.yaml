@@ -12,3 +12,10 @@ spec:
         backend:
           serviceName: helloworld
           servicePort: 80
+  - host: auth.inspections.test
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: auth-api
+          servicePort: 80

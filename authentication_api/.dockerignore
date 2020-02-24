@@ -1,0 +1,3 @@
+# Ignore generated files
+.DS_Store
+**/__pycache__
