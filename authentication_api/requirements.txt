@@ -1,6 +1,6 @@
 alembic==1.4.0
 email-validator==1.0.5
-fastapi==0.45.0
+fastapi==0.65.2
 passlib[bcrypt]==1.7.2
 psycopg2-binary==2.8.4
 python-multipart==0.0.5
